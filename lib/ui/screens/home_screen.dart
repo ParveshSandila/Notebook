@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:local_db_practice/models/note.dart';
+import 'package:local_db_practice/models/topic.dart';
 import 'package:local_db_practice/ui/screens/add_note.dart';
 import 'package:local_db_practice/data/note_db_handler.dart';
+import 'package:local_db_practice/ui/screens/settings.dart';
+import 'package:local_db_practice/ui/widgets/floating_button.dart';
 import 'package:local_db_practice/ui/widgets/search_box.dart';
 import 'package:local_db_practice/ui/widgets/topic_chip.dart';
 
@@ -17,13 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int selectedTopicIndex = 0;
 
-  final topicList = [
-    "All Notes",
-    "Reminder",
-    "Writings",
-    "Medicine",
-    "Other"
-  ];
+  List<Topic> topicList = [];
 
   @override
   void initState() {
@@ -32,6 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         list = value;
       })
+    );
+
+    NoteDBHandler.databaseHandler.getTopicList().then((value) =>
+        setState(() {
+          topicList = value;
+          selectedTopicIndex = value.indexWhere((element) => !element.isRemoveAble);
+        })
     );
   }
 
@@ -42,14 +46,34 @@ class _HomeScreenState extends State<HomeScreen> {
          child: Column(
            crossAxisAlignment: CrossAxisAlignment.start,
            children: [
-             const Padding(
-               padding: EdgeInsets.fromLTRB(15,20,15,10),
-               child:   Text(
-                 "NoteBook",
-                 style: TextStyle(
-                     fontSize: 22,
-                     fontWeight: FontWeight.w600
-                 ),
+             Padding(
+               padding: const EdgeInsets.fromLTRB(15,20,15,10),
+               child:  Row(
+                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                 crossAxisAlignment: CrossAxisAlignment.center,
+                 children: [
+                   const Text(
+                     "NoteBook",
+                      style: TextStyle(
+                         fontSize: 22,
+                         color: Color(0xFF0169B2),
+                         fontWeight: FontWeight.w600
+                     ),
+                   ),
+
+
+                   InkWell(
+                     onTap: (){
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(builder : (context) => const SettingsScreen())
+                       );
+                     },
+                     child: const Icon(
+                       Icons.settings
+                     ),
+                   )
+                 ],
                ),
              ),
              SearchBox(keywordChanged: (keyword){
@@ -74,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             });
                           },
                           child: TopicChip(
-                              name: topicList[index],
+                              topic: topicList[index],
                               selected: index == selectedTopicIndex,
                           ),
                         ),
@@ -90,15 +114,26 @@ class _HomeScreenState extends State<HomeScreen> {
                        itemBuilder: (context, index) {
                          final note = list[index];
                          return ListTile(
+                           leading: Container(
+                             height: 40,
+                             width: 40,
+                             decoration: BoxDecoration(
+                                 color: Colors.grey,
+                                 border: Border.all(
+                                     color: Colors.black12
+                                 ),
+                                 borderRadius: const BorderRadius.all(Radius.circular(8))
+                             ),
+                           ),
                            title: Text(
-                             note.heading ?? "",
+                             note.heading,
                              style: const TextStyle(
                                  color: Colors.black87,
                                  fontWeight: FontWeight.w600
                              ),
                            ),
                            subtitle: Text(
-                             note.description ?? "",
+                             note.description,
                              maxLines: 1,
                              overflow: TextOverflow.ellipsis,
                              style: const TextStyle(
@@ -116,56 +151,14 @@ class _HomeScreenState extends State<HomeScreen> {
            ],
          ),
        ),
-       // floatingActionButton: FloatingActionButton(
-       //    onPressed: (){
-       //      Navigator.push(
-       //          context,
-       //          MaterialPageRoute(builder: (context) => const AddNoteScreen())
-       //      );
-       //    },
-       //    tooltip: 'Add Note',
-       //    child: const Icon(Icons.add),
-       // ), // This trailing comma makes auto-formatting nicer for build methods.
-      floatingActionButton: InkWell(
-        onTap: (){
+      floatingActionButton: FloatingButton(
+        text : "Add Note",
+        onClick: (){
           Navigator.push(
-             context,
-             MaterialPageRoute(builder: (context) => const AddNoteScreen())
+              context,
+              MaterialPageRoute(builder: (context) => const AddNoteScreen())
           );
         },
-        child: Container(
-          height: 55,
-          width: 150,
-          decoration: BoxDecoration(
-            color : Theme.of(context).colorScheme.primaryContainer,
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-            boxShadow : const [
-              BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5.0,
-                  spreadRadius : 0.5,
-                  blurStyle: BlurStyle.normal,
-                  offset: Offset(1,1)
-              ),
-            ],
-          ),
-          child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                 Icon(Icons.add),
-                 SizedBox(width: 5),
-                 Text(
-                    "Add Note",
-                     style: TextStyle(
-                        color: Colors.black87,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600
-                     )
-                  ),
-              ]
-            ),
-        ),
       ),
     );
   }

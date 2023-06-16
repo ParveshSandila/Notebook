@@ -37,7 +37,19 @@ class _SearchBoxState extends State<SearchBox> {
                   child: TextField(
                     decoration: const InputDecoration(
                         border: InputBorder.none,
-                        hintText: 'Search anything'
+                        hintText: 'Search anything',
+                        iconColor: Colors.black87,
+                        hintStyle: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black45,
+                          fontWeight: FontWeight.normal,
+                        ),
+                    ),
+                    textCapitalization: TextCapitalization.sentences,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.normal
                     ),
                     onChanged : (keyword){
                       widget.keywordChanged(keyword);
